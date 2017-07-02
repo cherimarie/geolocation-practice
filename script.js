@@ -29,25 +29,27 @@ var wow = function(){
 let onloadFunc = function(){
   const resp = JSON.parse(this.response);
   console.log(resp);
-  var li = document.createElement("li");
 
   if(resp.results.length > 0){
-    // if results, print most specific result as li inside ul
-    // print first result's formatted address to page
-    li.innerHTML = resp.results[0].formatted_address;
+    // if results, print first result's formatted address to page
+    // the first result is the most specific one
+    printListItem(resp.results[0].formatted_address);
   } else {
-    // if no results, print an error message as li inside ul
-    li.innerHTML = "Sorry, no results were found";
+    // if no results, print an error message to page
+    printListItem("Sorry, no results were found");
   }
-
-  document.getElementById("listContainer").appendChild(li);
 }
 
 // onerror callback function
 let onerrorFunc = function(){
-  // print an error message as li inside ul
-  var li = document.createElement("li");
-  li.innerHTML = "Sorry, an error occurred";
+  // print an error message to page
+   printListItem("Sorry, an error occurred");
+}
+
+// helper function to print message to page
+let printListItem = function(message){
+  let li = document.createElement("li");
+  li.innerHTML = message;
   document.getElementById("listContainer").appendChild(li);
 }
 
