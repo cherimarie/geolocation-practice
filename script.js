@@ -1,5 +1,5 @@
 const container = document.getElementById("container");
-const locations = [
+let locations = [
   { lat: 51.5074, lng: 0.1278 },
   { lat: 48.8566, lng: 2.3522 },
   { lat: 40.7128, lng: -74.0059 },
@@ -7,26 +7,35 @@ const locations = [
   { lat: 41.9028, lng: 12.4964 },
   { lat: 35.6895, lng: 139.6917 }
 ]
+// create a list container in the HTML that results can be appended to
+let ul = document.createElement("ul");
+ul.id = "listContainer";
 
-var wow = function(){
-  // create the container ul, give it an id so callback functions can find it
-  let ul = document.createElement("ul");
-  ul.id = "listContainer";
+// this is triggered when user clicks the button, starting place for all the fun stuff!
+function wow(){
+  // get user's location from the browser
+  navigator.geolocation.getCurrentPosition(geolocSuccess, geolocError);
+
   document.getElementById("container").appendChild(ul);
-  // for each object in list, call the api
-  for(var i=0; i<locations.length;i++){
-    let mapUri = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${locations[i].lat},${locations[i].lng}&key=AIzaSyA6dRmfYzxYwAULySeYAozp_1FzJrEjfdk`;
-    // new request object- open, define callbacks, send
-    let request = new XMLHttpRequest();
-    request.open("GET", mapUri, true);
-    request.onload = onloadFunc;
-    request.onerror = onerrorFunc;
-    request.send();
+  // for each object in locations list, call the api
+  for(let i=0; i<locations.length;i++){
+    getLocation(locations[i]);
   }
 }
 
-// onload callback function
-let onloadFunc = function(){
+// callback for successfully getting location from user's browser
+function geolocSuccess(position){
+  const newPos = {lat: position.coords.latitude, lng: position.coords.longitude};
+  getLocation(newPos);
+}
+
+// callback for no success getting location from user's browser
+function geolocError(){
+  console.log("Error getting user's location :(");
+}
+
+// API call onload callback function
+function onloadFunc(){
   const resp = JSON.parse(this.response);
   console.log(resp);
 
@@ -40,17 +49,32 @@ let onloadFunc = function(){
   }
 }
 
-// onerror callback function
-let onerrorFunc = function(){
+// API call onerror callback function
+function onerrorFunc(){
   // print an error message to page
    printListItem("Sorry, an error occurred");
 }
 
+// helper method to call API and convert longitude & latitude to a human friendly address
+function getLocation(locObj){
+  let mapUri = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${locObj.lat},${locObj.lng}&key=AIzaSyA6dRmfYzxYwAULySeYAozp_1FzJrEjfdk`;
+  // new request object- open, define callbacks, send
+  let request = new XMLHttpRequest();
+  request.open("GET", mapUri, true);
+  request.onload = onloadFunc;
+  request.onerror = onerrorFunc;
+  request.send();
+}
+
 // helper function to print message to page
-let printListItem = function(message){
+function printListItem(message){
   let li = document.createElement("li");
   li.innerHTML = message;
   document.getElementById("listContainer").appendChild(li);
 }
 
 
+// NOTE: for more information about function declarations vs expressions,
+// and how they are loaded in different orders, see:
+// https://www.sitepoint.com/function-expressions-vs-declarations/
+// https://javascriptweblog.wordpress.com/2010/07/06/function-declarations-vs-function-expressions/
